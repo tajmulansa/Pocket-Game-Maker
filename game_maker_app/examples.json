@@ -1,0 +1,24 @@
+{
+  "name": "Coin Dash Starter",
+  "width": 640,
+  "height": 360,
+  "scenes": [{
+    "id": "scene-1",
+    "name": "Main",
+    "objects": [
+      {"id":"player","name":"Player","kind":"player","x":70,"y":240,"width":40,"height":40,"color":4285446071,"behaviors":[
+        {"id":"move","type":"move","params":{"speed":160}},
+        {"id":"gravity","type":"gravity","params":{"gravity":850}},
+        {"id":"collision","type":"collision","params":{"solid":true}},
+        {"id":"score","type":"score","params":{"points":10}},
+        {"id":"trigger","type":"trigger","params":{"key":"Space","action":"jump","jump":340}}
+      ]},
+      {"id":"platform","name":"Ground","kind":"platform","x":0,"y":320,"width":640,"height":40,"color":4284817391,"behaviors":[]},
+      {"id":"coin1","name":"Coin","kind":"coin","x":280,"y":260,"width":32,"height":32,"color":4294638336,"behaviors":[]},
+      {"id":"coin2","name":"Coin 2","kind":"coin","x":440,"y":200,"width":32,"height":32,"color":4294638336,"behaviors":[]},
+      {"id":"label","name":"Hint","kind":"text","x":18,"y":18,"width":220,"height":28,"color":4281978040,"text":"WASD / arrows + Space","behaviors":[]}
+    ]
+  }],
+  "assets": [],
+  "customJs": "// Advanced mode: run once here and assign a frame callback.\ngame.onUpdate = function (dt) {\n  // game.score.add(1);\n};"
+}

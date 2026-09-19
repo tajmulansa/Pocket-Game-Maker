@@ -1,0 +1,110 @@
+name: Build Pocket Game Maker
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FLUTTER_CHANNEL: stable
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: 3.47.2
+          cache: true
+      - run: flutter create --platforms=android,ios,windows,macos .
+      - run: flutter pub get
+      - run: flutter build apk --release
+      - run: flutter build appbundle --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pocket-game-maker-android
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: 3.47.2
+          cache: true
+      - run: flutter config --enable-windows-desktop
+      - run: flutter create --platforms=android,ios,windows,macos .
+      - run: flutter pub get
+      - run: flutter build windows --release
+      - shell: pwsh
+        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath pocket-game-maker-windows.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pocket-game-maker-windows
+          path: pocket-game-maker-windows.zip
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: 3.47.2
+          cache: true
+      - run: flutter config --enable-macos-desktop
+      - run: flutter create --platforms=android,ios,windows,macos .
+      - run: flutter pub get
+      - run: flutter build macos --release
+      - run: ditto -c -k --sequesterRsrc --keepParent build/macos/Build/Products/Release/pocket_game_maker.app pocket-game-maker-macos.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pocket-game-maker-macos
+          path: pocket-game-maker-macos.zip
+
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: 3.47.2
+          cache: true
+      - run: flutter create --platforms=ios .
+      - run: flutter pub get
+      - run: flutter build ios --release --no-codesign
+      - run: ditto -c -k --sequesterRsrc --keepParent build/ios/iphoneos/Runner.app pocket-game-maker-ios.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pocket-game-maker-ios
+          path: pocket-game-maker-ios.zip
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [android, ios, windows, macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            dist/**/*.zip
+            dist/**/*.tar.gz
+            dist/**/*.apk
+            dist/**/*.aab
