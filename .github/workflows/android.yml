@@ -1,0 +1,32 @@
+name: Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "stable"
+
+      - run: flutter create --platforms=android .
+
+      - run: flutter pub get
+
+      - run: |
+          sed -i "s/proguard-android.txt/proguard-android-optimize.txt/g" \
+          ~/.pub-cache/hosted/pub.dev/flutter_inappwebview_android-*/android/build.gradle || true
+
+      - run: flutter build apk --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PocketGameMaker-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
