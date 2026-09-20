@@ -264,16 +264,36 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 
   Future<void> _export() async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/${state.project.name.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_')}.html5.zip');
-      await file.writeAsBytes(await exporter.buildZip(state.project), flush: true);
-      await SharePlus.instance.share(ShareParams(files: [XFile(file.path)], text: 'HTML5 game export'));
-      return;
-    }
-    final result = await exporter.exportProject(state.project);
-    if (result != null && mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Exported folder: ${result.path}')));
+  if (Platform.isAndroid || Platform.isIOS) {
+    final dir = await getTemporaryDirectory();
+
+    final file = File(
+      '${dir.path}/${state.project.name.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_')}.html5.zip',
+    );
+
+    await file.writeAsBytes(
+      await exporter.buildZip(state.project),
+      flush: true,
+    );
+
+    await Share.shareXFiles(
+      [XFile(file.path)],
+      text: 'HTML5 game export',
+    );
+
+    return;
   }
+
+  final result = await exporter.exportProject(state.project);
+
+  if (result != null && mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Exported folder: ${result.path}'),
+      ),
+    );
+  }
+}
 
   void _addScene(String value) {
     final id = 'scene-${DateTime.now().microsecondsSinceEpoch}';
