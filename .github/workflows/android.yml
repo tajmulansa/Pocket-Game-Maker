@@ -39,30 +39,9 @@ jobs:
           yes | "$SDKMANAGER" --licenses || true
           "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
 
-      - name: Set compile SDK to 36
+      - name: Set compile SDK to 36 for app and all plugins
         working-directory: game_maker_app
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          files = [
-              Path("android/app/build.gradle"),
-              Path("android/app/build.gradle.kts"),
-          ]
-
-          for path in files:
-              if path.exists():
-                  text = path.read_text()
-                  text = text.replace(
-                      "compileSdk = flutter.compileSdkVersion",
-                      "compileSdk = 36",
-                  )
-                  text = text.replace(
-                      "compileSdk flutter.compileSdkVersion",
-                      "compileSdk 36",
-                  )
-                  path.write_text(text)
-          PY
+        run: echo "flutter.compileSdkVersion=36" >> android/local.properties
 
       - name: Get dependencies
         working-directory: game_maker_app
