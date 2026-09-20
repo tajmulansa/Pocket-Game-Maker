@@ -18,6 +18,10 @@ jobs:
 
       - run: flutter create --platforms=android .
 
+      - run: |
+          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' android/app/build.gradle
+          sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 36/' android/app/build.gradle
+
       - run: flutter pub get
 
       - run: |
