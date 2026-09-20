@@ -22,9 +22,21 @@ jobs:
 
       - run: flutter create --platforms=android .
 
-      - run: |
-          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' android/app/build.gradle.kts
-          sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 36/' android/app/build.gradle.kts
+      - name: Force SDK 36 for all plugins
+        run: |
+          cat >> android/build.gradle.kts <<'EOF'
+
+          subprojects {
+              afterEvaluate {
+                  if (plugins.hasPlugin("com.android.library") || plugins.hasPlugin("com.android.application")) {
+                      extensions.findByName("android")?.let { ext ->
+                          ext.javaClass.methods.find { it.name == "setCompileSdkVersion" && it.parameterCount == 1 }
+                              ?.invoke(ext, 36)
+                      }
+                  }
+              }
+          }
+          EOF
 
       - run: flutter pub get
 
