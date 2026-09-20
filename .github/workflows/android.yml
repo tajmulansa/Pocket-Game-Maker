@@ -9,6 +9,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: game_maker_app
+
     steps:
       - uses: actions/checkout@v4
 
@@ -19,8 +23,8 @@ jobs:
       - run: flutter create --platforms=android .
 
       - run: |
-          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' android/app/build.gradle
-          sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 36/' android/app/build.gradle
+          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' android/app/build.gradle.kts
+          sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 36/' android/app/build.gradle.kts
 
       - run: flutter pub get
 
@@ -33,4 +37,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: PocketGameMaker-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: game_maker_app/build/app/outputs/flutter-apk/app-release.apk
